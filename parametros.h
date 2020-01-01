@@ -1,3 +1,29 @@
+/**
+ * Este arquivo possui todos os parametros gerais da aplicação.
+ * Ativação e Desativação da depuração
+ * Portas e Pinos a serem usados
+ * Parametros em geral.
+ * 
+ * Display:
+ * The circuit:
+   LCD RS pin to digital pin 13
+   LCD Enable pin to digital pin 12
+   LCD D4 pin to digital pin 4
+   LCD D5 pin to digital pin 5
+   LCD D6 pin to digital pin 6
+   LCD D7 pin to digital pin 7
+   LCD R/W pin to ground
+   10K resistor:
+   ends to +5V and ground
+
+ * Potenciometro
+ *    A1 como vcc
+ *    A2 como derivada
+ *    A3 como gnd
+ * 
+ * @Author: Carlos Delfino - consultoria@carlosdelfino.eti.br
+ * @Proponente: Severiano Mesquita - Severo
+ */
 #ifndef PARAMETROS_H
 #define PARAMETROS_H
 

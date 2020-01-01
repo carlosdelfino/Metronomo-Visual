@@ -1,3 +1,11 @@
+/**
+ * Neste arquivo são registrados parametros especificos
+ * que interferem no comportamento do algoritmo trazendo 
+ * novas abordagens para funcionamento do Metronomo.
+ * 
+ * @Author: Carlos Delfino - consultoria@carlosdelfino.eti.br
+ * @Proponente: Severiano Mesquita - Severo
+ */
 #ifndef ALGORITIMO_H
 #define ALGORITIMO_H
 
