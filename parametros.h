@@ -1,11 +1,11 @@
 /**
- * Este arquivo possui todos os parametros gerais da aplicação.
- * Ativação e Desativação da depuração
- * Portas e Pinos a serem usados
- * Parametros em geral.
- * 
- * Display:
- * The circuit:
+   Este arquivo possui todos os parametros gerais da aplicação.
+   Ativação e Desativação da depuração
+   Portas e Pinos a serem usados
+   Parametros em geral.
+
+   Display:
+   The circuit:
    LCD RS pin to digital pin 13
    LCD Enable pin to digital pin 12
    LCD D4 pin to digital pin 4
@@ -16,14 +16,14 @@
    10K resistor:
    ends to +5V and ground
 
- * Potenciometro
- *    A1 como vcc
- *    A2 como derivada
- *    A3 como gnd
- * 
- * @Author: Carlos Delfino - consultoria@carlosdelfino.eti.br
- * @Proponente: Severiano Mesquita - Severo
- */
+   Potenciometro
+      A1 como vcc
+      A2 como derivada
+      A3 como gnd
+
+   @Author: Carlos Delfino - consultoria@carlosdelfino.eti.br
+   @Proponente: Severiano Mesquita - Severo
+*/
 #ifndef PARAMETROS_H
 #define PARAMETROS_H
 
@@ -60,6 +60,18 @@
 #define LCD_D6        6
 #define LCD_D7        7
 
+#define LCD_BPM_TEXT       "BPM:"
+#define LCD_BPM_TEXT_COL   0
+#define LCD_BPM_TEXT_LINE  1
+#define LCD_BPM_VALUE_COL  len(LCD_BPM_TEXT)+1
+#define LCD_BPM_VALUE_LINE 1
+
+#define LCD_STATE_TEXT        "ST:"
+#define LCD_STATE_TEXT_COL   10
+#define LCD_STATE_TEXT_LINE  1
+#define LCD_STATE_VALUE_COL  len(LCD_STATE_TEXT)+1+10
+#define LCD_STATE_VALUE_LINE 0
+
 // BPM máximo e mínimo
 #define BPM_MAX      360
 #define BPM_MED      120
@@ -69,8 +81,7 @@
 double bpm = BPM_DEFAULT;
 double bpmShow;
 
-const double TIME_BLINK = 700;
-double last_blink = 0;
+#define TIME_BLINK 700
 
 const double TIME_BUTTON = 350;
 double last_cima = 0;

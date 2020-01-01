@@ -1,13 +1,13 @@
 /**
- * Metronomo Visual
- * 
- * A proposta aprsentada por Severiano vem da necessidade 
- * um metronomo Visual que permita aos músicos sincronizarem
- * as músicas
- * 
- * @Author: Carlos Delfino - consultoria@carlosdelfino.eti.br
- * @Proponente: Severiano Mesquita - Severo
- * 
+   Metronomo Visual
+
+   A proposta aprsentada por Severiano vem da necessidade
+   um metronomo Visual que permita aos músicos sincronizarem
+   as músicas
+
+   @Author: Carlos Delfino - consultoria@carlosdelfino.eti.br
+   @Proponente: Severiano Mesquita - Severo
+
 */
 
 #include "parametros.h"
@@ -24,17 +24,39 @@ void setup() {
   Serial.begin(9600);
   Serial.println(LED_ALGO);
   Serial.println(LED_STATES);
-  Serial.println("Metrono Servero! - V1.1");
+  Serial.println("Metrônomo Servero! - V1.1");
   Serial.println("Arduino Minas");
 #endif
 
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
-  // Print a message to the LCD.
-  lcd.print("Metromo Severo!");
 
+  for (int i = 0; i < 16; i++) {
+    lcd.print("#");
+    delay(80);
+  }
   lcd.setCursor(0, 1);
-  lcd.print("BPM :");
+  for (int i = 0; i < 16; i++) {
+    lcd.print("#");
+    delay(80);
+  }
+  lcd.clear();
+
+  // Print a message to the LCD.
+  lcd.print("Metrônomo!");
+  lcd.setCursor(9, 1);
+  lcd.print("Severo!");
+  for (int i = 0; i < 9; i++) {
+    blinkLCD();
+    delay(400);
+  }
+  lcd.clear();
+
+  lcd.setCursor(LCD_BPM_TEXT_COL, LCD_BPM_TEXT_LINE);
+  lcd.print(LCD_BPM_TEXT);
+
+  lcd.setCursor(LCD_STATE_TEXT_COL, LCD_STATE_TEXT_LINE);
+  lcd.print(LCD_STATE_TEXT);
 
   pinMode(POT_VCC, OUTPUT);
   pinMode(POT_GND, OUTPUT);
@@ -45,6 +67,8 @@ void setup() {
     pinMode(LED[l], OUTPUT);
     digitalWrite(LED[l], LOW);
   }
+
+  lcd.display();
 }
 
 void loop() {
@@ -75,7 +99,7 @@ void showBPM() {
     lcd.setCursor(5, 1);
     lcd.print("    ");
     lcd.setCursor(5, 1);
-    lcd.print(bpm);
+    lcd.print((int)bpm);
     bpmShow = bpm;
   }
 }
@@ -147,6 +171,8 @@ byte readButton() {
 
 void blinkLCD() {
   static boolean lcd_display = false;
+  static double last_blink = millis();
+
   if (millis() - last_blink >= TIME_BLINK) {
     if (lcd_display) {
       lcd.noDisplay();
