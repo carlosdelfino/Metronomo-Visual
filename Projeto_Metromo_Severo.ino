@@ -44,9 +44,15 @@
 #define POT_DERIVADA A2
 
 #define BUTTON_PORT  A0
+#define BUTTON_LIMIAR_DIREITA   100
+#define BUTTON_LIMIAR_CIMA      200
+#define BUTTON_LIMIAR_BAIXO     400
+#define BUTTON_LIMIAR_ESQUERDA  600
+#define BUTTON_LIMIAR_SELECIONA 800
 
 // BPM máximo e mínimo
 #define BPM_MAX      360
+#define BPM_MED      120
 #define BPM_MIN      30
 
 #define LED1         13
@@ -74,7 +80,7 @@
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
-double bpm = 30;
+double bpm = BPM_MIN;
 double bpmShow;
 
 const double TIME_BLINK = 700;
@@ -144,7 +150,7 @@ void showBPM() {
 
 void piscaTodos() {
   static byte ledState = 1;
-  double bpmCalc = 1/((bpm / 60) * 1000);
+  double bpmCalc = 1/(bpm / 60) * 1000;
   if (millis() - last_led1 >= bpmCalc) {
     switch (ledState) {
 //      case 7:
@@ -211,15 +217,15 @@ void checaBPM(byte button) {
 }
 byte readButton() {
   int  botao = analogRead (BUTTON_PORT);  //Leitura do valor da porta analógica A0
-  if (botao < 100) {
+  if (botao < BUTTON_LIMIAR_DIREITA) {
     return DIREITA;
-  }   else if (botao < 200) {
+  }   else if (botao < BUTTON_LIMIAR_CIMA) {
     return CIMA;
-  }   else if (botao < 400) {
+  }   else if (botao < BUTTON_LIMIAR_BAIXO) {
     return BAIXO;
-  }   else if (botao < 600) {
+  }   else if (botao < BUTTON_LIMIAR_ESQUERDA) {
     return ESQUERDA;
-  }   else if (botao < 800) {
+  }   else if (botao < BUTTON_LIMIAR_SELECIONA) {
     return SELECIONA;
   }
   return NULL;
