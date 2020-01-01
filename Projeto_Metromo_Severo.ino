@@ -150,8 +150,7 @@ void checkButton() {
       break;
     case SELECIONA:
       if (millis() - last_seleciona >= TIME_BUTTON) {
-        selecionaState++;
-        selecionaState = min(LED_ALGO - 1, selecionaState);
+        selecionaState = ++selecionaState >= LED_ALGO ? 0 : selecionaState;
         last_seleciona = millis();
       }
       break;

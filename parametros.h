@@ -20,11 +20,6 @@
 #define BUTTON_LIMIAR_ESQUERDA  600
 #define BUTTON_LIMIAR_SELECIONA 800
 
-// BPM máximo e mínimo
-#define BPM_MAX      360
-#define BPM_MED      120
-#define BPM_MIN      30
-
 // NOMES DOS BOTÕES
 #define BAIXO         1
 #define CIMA          2
@@ -39,8 +34,13 @@
 #define LCD_D6        6
 #define LCD_D7        7
 
+// BPM máximo e mínimo
+#define BPM_MAX      360
+#define BPM_MED      120
+#define BPM_DEFAULT  60
+#define BPM_MIN      30
 
-double bpm = BPM_MIN;
+double bpm = BPM_DEFAULT;
 double bpmShow;
 
 const double TIME_BLINK = 700;
