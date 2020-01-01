@@ -131,36 +131,64 @@ void loop() {
   piscaTodos();
 }
 
-void showBPM(){
-  if(bpmShow != bpm){
-  lcd.setCursor(5, 1);
-  lcd.print("    ");
-  lcd.setCursor(5, 1);
-  lcd.print(bpm);
-  bpmShow = bpm;
+void showBPM() {
+  if (bpmShow != bpm) {
+    lcd.setCursor(5, 1);
+    lcd.print("    ");
+    lcd.setCursor(5, 1);
+    lcd.print(bpm);
+    bpmShow = bpm;
   }
 
 }
 
 void piscaTodos() {
   static byte ledState = 1;
-  double bpmCalc = (bpm / 60) * 1000;
-      if (millis() - last_led4 >= bpmCalc / 2) {
-        digitalWrite(LED4, digitalRead(LED1));
-        last_led4 = millis();
-      }
-      if (millis() - last_led3 >= bpmCalc / 3) {
-        digitalWrite(LED3, digitalRead(LED1));
-        last_led3 = millis();
-      }
-      if (millis() - last_led2 >= bpmCalc / 4) {
-        digitalWrite(LED2, digitalRead(LED1));
-        last_led2 = millis();
-      }
-      if (millis() - last_led1 >= bpmCalc) {
-        digitalWrite(LED1, !digitalRead(LED1));
-        last_led1 = millis();
-      }
+  double bpmCalc = 1/((bpm / 60) * 1000);
+  if (millis() - last_led1 >= bpmCalc) {
+    switch (ledState) {
+//      case 7:
+      case 1:
+        digitalWrite(LED1, HIGH);
+        digitalWrite(LED2, LOW);
+        digitalWrite(LED3, LOW);
+        digitalWrite(LED4, LOW);
+        ledState++;
+        break;
+ //     case 6:
+      case 2:
+        digitalWrite(LED1, HIGH);
+        digitalWrite(LED2, HIGH);
+        digitalWrite(LED3, LOW);
+        digitalWrite(LED4, LOW);
+        ledState++;
+        break;
+  //    case 5:
+      case 3:
+        digitalWrite(LED1, HIGH);
+        digitalWrite(LED2, HIGH);
+        digitalWrite(LED3, HIGH);
+        digitalWrite(LED4, LOW);
+        ledState++;
+        break;
+      case 4:
+        digitalWrite(LED1, HIGH);
+        digitalWrite(LED2, HIGH);
+        digitalWrite(LED3, HIGH);
+        digitalWrite(LED4, HIGH);
+        ledState = 8;
+//        ledState++;
+        break;
+      case 8:
+        digitalWrite(LED1, LOW);
+        digitalWrite(LED2, LOW);
+        digitalWrite(LED3, LOW);
+        digitalWrite(LED4, LOW);
+        ledState = 1;
+        break;
+    }
+    last_led1 = millis();
+  }
 }
 
 void checaBPM(byte button) {
