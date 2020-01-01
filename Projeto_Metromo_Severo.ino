@@ -37,42 +37,8 @@
 
 */
 
-#define BLINK_LCD    false
-
-#define POT_VCC      A1
-#define POT_GND      A3
-#define POT_DERIVADA A2
-
-#define BUTTON_PORT  A0
-#define BUTTON_LIMIAR_DIREITA   100
-#define BUTTON_LIMIAR_CIMA      200
-#define BUTTON_LIMIAR_BAIXO     400
-#define BUTTON_LIMIAR_ESQUERDA  600
-#define BUTTON_LIMIAR_SELECIONA 800
-
-// BPM máximo e mínimo
-#define BPM_MAX      360
-#define BPM_MED      120
-#define BPM_MIN      30
-
-#define LED1         13
-#define LED2         12
-#define LED3         11
-#define LED4          3
-
-// NOMES DOS BOTÕES
-#define BAIXO         1
-#define CIMA          2
-#define ESQUERDA      3
-#define DIREITA       4
-#define SELECIONA     5
-
-#define LCD_RS        8
-#define LCD_ENABLE    9
-#define LCD_D4        4
-#define LCD_D5        5
-#define LCD_D6        6
-#define LCD_D7        7
+#include "parametros.h"
+#include "algoritimos.h"
 
 // include the library code:
 #include <LiquidCrystal.h>
@@ -80,22 +46,15 @@
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
-double bpm = BPM_MIN;
-double bpmShow;
-
-const double TIME_BLINK = 700;
-double last_blink = 0;
-
-double last_led1 = 0;
-double last_led2 = 0;
-double last_led3 = 0;
-double last_led4 = 0;
-
-const double TIME_BUTTON = 350;
-double last_cima = 0;
-double last_baixo = 0;
-
 void setup() {
+#if SHOW_SERIAL
+  Serial.begin(9600);
+  Serial.println(LED_ALGO);
+  Serial.println(LED_STATES);
+  Serial.println("Metrono Servero! - V1.1");
+  Serial.println("Arduino Minas");
+#endif
+
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
   // Print a message to the LCD.
@@ -109,34 +68,35 @@ void setup() {
   digitalWrite(POT_VCC, LOW);
   digitalWrite(POT_GND, HIGH);
 
-  pinMode(LED1, OUTPUT);
-  pinMode(LED2, OUTPUT);
-  pinMode(LED3, OUTPUT);
-  pinMode(LED4, OUTPUT);
-
-  digitalWrite(LED1, LOW);
-  digitalWrite(LED2, LOW);
-  digitalWrite(LED3, LOW);
-  digitalWrite(LED4, LOW);
-
+  for (byte l = 0; l < LED_NUMBER; l++) {
+    pinMode(LED[l], OUTPUT);
+    digitalWrite(LED[l], LOW);
+  }
 }
 
 void loop() {
-  //  analogWrite(LED3, map(analogRead(POT_DERIVADA), 0, 1024, 0, 255) );
-
 #if BLINK_LCD
   blinkLCD();
 #endif
 
-  byte button = readButton();
-
-  checaBPM(button);
+  checkButton();
 
   showBPM();
+  showState();
 
-  piscaTodos();
+  blinkLEDBPM();
 }
 
+void showState() {
+  if (stateShow != selecionaState) {
+    lcd.setCursor(14, 1);
+    lcd.print("  ");
+    lcd.setCursor(14, 1);
+    lcd.print(selecionaState);
+    stateShow = selecionaState;
+  }
+
+}
 void showBPM() {
   if (bpmShow != bpm) {
     lcd.setCursor(5, 1);
@@ -145,59 +105,34 @@ void showBPM() {
     lcd.print(bpm);
     bpmShow = bpm;
   }
-
 }
 
-void piscaTodos() {
-  static byte ledState = 1;
-  double bpmCalc = 1/(bpm / 60) * 1000;
-  if (millis() - last_led1 >= bpmCalc) {
-    switch (ledState) {
-//      case 7:
-      case 1:
-        digitalWrite(LED1, HIGH);
-        digitalWrite(LED2, LOW);
-        digitalWrite(LED3, LOW);
-        digitalWrite(LED4, LOW);
-        ledState++;
-        break;
- //     case 6:
-      case 2:
-        digitalWrite(LED1, HIGH);
-        digitalWrite(LED2, HIGH);
-        digitalWrite(LED3, LOW);
-        digitalWrite(LED4, LOW);
-        ledState++;
-        break;
-  //    case 5:
-      case 3:
-        digitalWrite(LED1, HIGH);
-        digitalWrite(LED2, HIGH);
-        digitalWrite(LED3, HIGH);
-        digitalWrite(LED4, LOW);
-        ledState++;
-        break;
-      case 4:
-        digitalWrite(LED1, HIGH);
-        digitalWrite(LED2, HIGH);
-        digitalWrite(LED3, HIGH);
-        digitalWrite(LED4, HIGH);
-        ledState = 8;
-//        ledState++;
-        break;
-      case 8:
-        digitalWrite(LED1, LOW);
-        digitalWrite(LED2, LOW);
-        digitalWrite(LED3, LOW);
-        digitalWrite(LED4, LOW);
-        ledState = 1;
-        break;
+void blinkLEDBPM() {
+  static byte ledState = 0;
+  double bpmCalc = (1 / (bpm / 60) * 1000);
+  if (millis() - last_led >= bpmCalc / matrixAlgoFator[selecionaState]) {
+#if SHOW_SERIAL
+    Serial.print("Algo: ");
+    Serial.print(selecionaState);
+    Serial.print(" ");
+#endif
+    for (byte l = 0; l < LED_NUMBER; l++) {
+      digitalWrite(LED[l], matrixAlgoLED[selecionaState][ledState][l]);
+#if SHOW_SERIAL
+      Serial.print(matrixAlgoLED[selecionaState][ledState][l]);
+      Serial.print(" ");
+#endif
     }
-    last_led1 = millis();
+#if SHOW_SERIAL
+    Serial.println();
+#endif
+    ledState = (++ledState == LED_STATES) ? 0 : ledState;
+    last_led = millis();
   }
 }
 
-void checaBPM(byte button) {
+void checkButton() {
+  byte button = readButton();
   switch (button) {
     case CIMA:
       if (millis() - last_cima >= TIME_BUTTON) {
@@ -213,10 +148,17 @@ void checaBPM(byte button) {
         last_baixo = millis();
       }
       break;
+    case SELECIONA:
+      if (millis() - last_seleciona >= TIME_BUTTON) {
+        selecionaState++;
+        selecionaState = min(LED_ALGO - 1, selecionaState);
+        last_seleciona = millis();
+      }
+      break;
   }
 }
 byte readButton() {
-  int  botao = analogRead (BUTTON_PORT);  //Leitura do valor da porta analógica A0
+  int  botao = analogRead (BUTTON_PORT);
   if (botao < BUTTON_LIMIAR_DIREITA) {
     return DIREITA;
   }   else if (botao < BUTTON_LIMIAR_CIMA) {
