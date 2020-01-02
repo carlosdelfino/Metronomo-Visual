@@ -10,14 +10,18 @@
 
 */
 
-#include "parametros.h"
-#include "algoritimos.h"
-
 // include the library code:
 #include <LiquidCrystal.h>
+#include <EEPROM.h>
+
+#include "parametros.h"
+#include "algoritimos.h"
+#include "memoria.h"
 
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
+
+byte selecionaState = STATE_DEFAULT;
 
 void setup() {
 #if SHOW_SERIAL
@@ -52,6 +56,9 @@ void setup() {
   }
   lcd.clear();
 
+  lcd.setCursor(LCD_BPM_BEAT_TEXT_COL, LCD_BPM_BEAT_TEXT_LINE);
+  lcd.print(LCD_BPM_BEAT_TEXT);
+
   lcd.setCursor(LCD_BPM_TEXT_COL, LCD_BPM_TEXT_LINE);
   lcd.print(LCD_BPM_TEXT);
 
@@ -85,16 +92,18 @@ void loop() {
 }
 
 void showState() {
+  static byte stateShow = 99;
   if (stateShow != selecionaState) {
-    lcd.setCursor(14, 1);
-    lcd.print("  ");
-    lcd.setCursor(14, 1);
+    lcd.setCursor(LCD_STATE_VALUE_COL, LCD_STATE_VALUE_LINE);
+//    lcd.print("  ");
+//    lcd.setCursor(14, 1);
     lcd.print(selecionaState);
     stateShow = selecionaState;
   }
 
 }
 void showBPM() {
+  static double bpmShow;
   if (bpmShow != bpm) {
     lcd.setCursor(5, 1);
     lcd.print("    ");
@@ -105,7 +114,9 @@ void showBPM() {
 }
 
 void blinkLEDBPM() {
+  static double last_led;
   static byte ledState = 0;
+
   double bpmCalc = (1 / (bpm / 60) * 1000);
   if (millis() - last_led >= bpmCalc / matrixAlgoFator[selecionaState]) {
 #if SHOW_SERIAL
@@ -120,15 +131,30 @@ void blinkLEDBPM() {
       Serial.print(" ");
 #endif
     }
+    showBPMTime((ledState / matrixAlgoFator[selecionaState]) + 1);
+
 #if SHOW_SERIAL
     Serial.println();
 #endif
-    ledState = (++ledState == LED_STATES) ? 0 : ledState;
+    ledState = (++ledState >= LED_STATES) ? 0 : ledState;
     last_led = millis();
   }
 }
 
+void showBPMTime(byte l) {
+  static byte lastLed;
+  if (lastLed != l) {
+    lcd.setCursor(LCD_BPM_BEAT_VALUE_COL, LCD_BPM_BEAT_VALUE_LINE);
+    lcd.print(l);
+    lastLed = l;
+  }
+}
+
 void checkButton() {
+  static double last_cima = millis();
+  static double last_baixo = millis();
+  static double last_seleciona = millis();
+
   byte button = readButton();
   switch (button) {
     case CIMA:
@@ -185,3 +211,46 @@ void blinkLCD() {
   }
 }
 
+
+void writeMemoria(struct memoria_t input) {
+  //    uint8_t* src = (uint8_t*)input;
+  //  uint8_t* dst = (uint8_t*)BPM_EEPROM_ADDRESS;
+  //    for (uint16_t i = 0; i < len(memoria_t); i++) {
+  //        eeprom_write_byte(dst++, *src++);
+  //    }
+  EEPROM.get(BPM_EEPROM_ADDRESS, input);
+
+#if SHOW_SERIAL
+  Serial.println("Write Memoria");
+  Serial.print("Default BPM: ");
+  Serial.print(input.bpm);
+  Serial.print("  BPM Programado: ");
+  for (int i = 0; i < BPM_PROG_SIZE; i++) {
+    Serial.print(input.bpmProg[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+#endif
+}
+
+void readMemoria(struct memoria_t output) {
+  //  uint8_t* src = (uint8_t*)BPM_EEPROM_ADDRESS;
+  //   uint8_t* dst = (uint8_t*)output;
+  //   for (uint16_t i = 0; i < len(memoria_t); i++) {
+  //       *dst++ = eeprom_read_byte(src++);
+  //   }
+
+  EEPROM.get(BPM_EEPROM_ADDRESS, output);
+
+#if SHOW_SERIAL
+  Serial.println("Write Memoria");
+  Serial.print("Default BPM: ");
+  Serial.print(&output.bpm);
+  Serial.print("  BPM Programado: ");
+  for (int i = 0; i < BPM_PROG_SIZE; i++) {
+    Serial.print(&output.bpmProg[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+#endif
+}

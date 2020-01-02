@@ -27,6 +27,8 @@
 #ifndef PARAMETROS_H
 #define PARAMETROS_H
 
+#include <Arduino.h>
+
 // ativa depuração via Serial, o uso da serial pode causar assincronia dos pulsos do metromo
 #define SHOW_SERIAL   false
 // informa se o display deve ficar piscando
@@ -63,14 +65,21 @@
 #define LCD_BPM_TEXT       "BPM:"
 #define LCD_BPM_TEXT_COL   0
 #define LCD_BPM_TEXT_LINE  1
-#define LCD_BPM_VALUE_COL  len(LCD_BPM_TEXT)+1
+#define LCD_BPM_VALUE_COL  5 + LCD_BPM_TEXT_COL + 2
 #define LCD_BPM_VALUE_LINE 1
 
-#define LCD_STATE_TEXT        "ST:"
-#define LCD_STATE_TEXT_COL   10
+#define LCD_BPM_BEAT_TEXT       "Beat:"
+#define LCD_BPM_BEAT_TEXT_COL   9
+#define LCD_BPM_BEAT_TEXT_LINE  0
+#define LCD_BPM_BEAT_VALUE_COL  5 + LCD_BPM_BEAT_TEXT_COL + 1
+#define LCD_BPM_BEAT_VALUE_LINE 0
+
+
+#define LCD_STATE_TEXT       "ST:"
+#define LCD_STATE_TEXT_COL   11
 #define LCD_STATE_TEXT_LINE  1
-#define LCD_STATE_VALUE_COL  len(LCD_STATE_TEXT)+1+10
-#define LCD_STATE_VALUE_LINE 0
+#define LCD_STATE_VALUE_COL  3 + LCD_STATE_TEXT_COL + 1
+#define LCD_STATE_VALUE_LINE 1
 
 // BPM máximo e mínimo
 #define BPM_MAX      360
@@ -79,26 +88,18 @@
 #define BPM_MIN      30
 
 double bpm = BPM_DEFAULT;
-double bpmShow;
 
 #define TIME_BLINK 700
 
 const double TIME_BUTTON = 350;
-double last_cima = 0;
-double last_baixo = 0;
-
-byte selecionaState = STATE_DEFAULT;
-byte stateShow = 99;
-double last_seleciona = 0;
-
-// tempo/stado do LED
-byte ledState = 0;
-
-// tempo da ultima mudança de estado dos leds
-double last_led;
 
 // matrix de LED a ser acionada confrome matrix de algoritimo
-const byte LED[] = {13, 12, 11, 3};
+#define LED1 13
+#define LED2 12
+#define LED3 11
+#define LED4 03
+
+const byte LED[] = {LED1,LED2,LED3,LED4};
 #define LED_NUMBER  (sizeof LED / sizeof(byte))
 
 #endif

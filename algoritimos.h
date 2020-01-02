@@ -9,6 +9,7 @@
 #ifndef ALGORITIMO_H
 #define ALGORITIMO_H
 
+#include <Arduino.h>
 #include "parametros.h"
 
 // matrix de alogritmo que define a sequência de acendimento de LEDs
