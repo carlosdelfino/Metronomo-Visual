@@ -39,8 +39,8 @@
 // Seleciona qual algoritmo é o padrão
 #define STATE_DEFAULT   1
 
-#define POT_VCC       A1
-#define POT_GND       A3
+#define POT_VCC       A3
+#define POT_GND       A1
 #define POT_DERIVADA  A2
 
 #define BUTTON_PORT   A0
@@ -89,6 +89,7 @@
 
 // BPM máximo e mínimo
 #define BPM_MAX      360
+#define BPM_MAX_POT (BPM_MAX+2)
 #define BPM_MED      120
 #define BPM_MIN      30
 
@@ -102,6 +103,7 @@
 #define BPM_PROG_1 1
 #define BPM_PROG_2 2
 #define BPM_PROG_3 3
+#define BPM_POT_LAST_CHANGE_TIME 100
 
 double bpm = BPM_PROG_DEFAULT_0;
 

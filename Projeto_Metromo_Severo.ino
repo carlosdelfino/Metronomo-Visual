@@ -191,6 +191,7 @@ void loop() {
 #endif
 
   checkButton();
+  checkPotenciometer();
 
   showBPM();
   showState();
@@ -198,6 +199,31 @@ void loop() {
   blinkLEDBPM();
 
   checkMemoryData();
+}
+
+void checkPotenciometer() {
+  static double lastChangeBPM = millis();
+  int analogicBPM;
+  if ( millis() - lastChangeBPM > BPM_POT_LAST_CHANGE_TIME) {
+    analogicBPM = analogRead(POT_DERIVADA);
+    analogicBPM += analogRead(POT_DERIVADA);
+    analogicBPM += analogRead(POT_DERIVADA);
+    analogicBPM += analogRead(POT_DERIVADA);
+    analogicBPM /= 4;
+
+    bpm = map(analogicBPM, 0, 1023, BPM_MIN, BPM_MAX_POT);
+    // Quando a mudança de bpm é pelo potencimetro analógico não precisa gravar na memória
+    // ele grava pela posição mecânica do potenciometro.
+    // é preciso analisar soluções com potenciometros digitais/tipo encoder
+    lastChangeBPM = millis();
+  }
+#if SHOW_SERIAL
+  Serial.print("Analogic BPM: ");
+  Serial.print(analogicBPM);
+  Serial.print(" BPM: ");
+  Serial.println(bpm);
+#endif
+
 }
 
 void showMemoryState() {
@@ -287,19 +313,13 @@ void checkButton() {
   switch (button) {
     case CIMA:
       if (millis() - last_cima >= TIME_BUTTON) {
-        bpm++;
-        bpm = min(BPM_MAX, bpm);
-        memory.bpm = bpm;
-        memoryChanged = millis();
+        if (sensorType = SENSOR_BUTTONS) upBPM();
         last_cima = millis();
       }
       break;
     case BAIXO:
       if (millis() - last_baixo >= TIME_BUTTON) {
-        bpm--;
-        bpm = max(BPM_MIN, bpm);
-        memory.bpm = bpm;
-        memoryChanged = millis();
+        if (sensorType = SENSOR_BUTTONS) downBPM();
         last_baixo = millis();
       }
       break;
@@ -312,6 +332,20 @@ void checkButton() {
       }
       break;
   }
+}
+
+void upBPM() {
+  bpm++;
+  bpm = min(BPM_MAX, bpm);
+  memory.bpm = bpm;
+  memoryChanged = millis();
+}
+
+void downBPM() {
+  bpm--;
+  bpm = max(BPM_MIN, bpm);
+  memory.bpm = bpm;
+  memoryChanged = millis();
 }
 byte readButton() {
   int  botao = analogRead (BUTTON_PORT);
