@@ -201,7 +201,13 @@ void loop() {
 }
 
 void showMemoryState() {
-
+  static String showMemoryState = "#";
+  lcd.setCursor(LCD_MEMORY_STATE_COL, LCD_MEMORY_STATE_LINE);
+  if (memoryChanged != __DBL_MAX__) {
+    showMemoryState = (showMemoryState == "#") ? "*" : "#";
+    lcd.print(showMemoryState);
+  } else
+    lcd.print(" ");
 }
 
 void checkMemoryData() {
@@ -283,6 +289,7 @@ void checkButton() {
       if (millis() - last_cima >= TIME_BUTTON) {
         bpm++;
         bpm = min(BPM_MAX, bpm);
+        memory.bpm = bpm;
         memoryChanged = millis();
         last_cima = millis();
       }
@@ -291,6 +298,7 @@ void checkButton() {
       if (millis() - last_baixo >= TIME_BUTTON) {
         bpm--;
         bpm = max(BPM_MIN, bpm);
+        memory.bpm = bpm;
         memoryChanged = millis();
         last_baixo = millis();
       }

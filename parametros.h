@@ -84,6 +84,9 @@
 #define LCD_STATE_VALUE_COL  3 + LCD_STATE_TEXT_COL + 1
 #define LCD_STATE_VALUE_LINE 1
 
+#define LCD_MEMORY_STATE_LINE 0
+#define LCD_MEMORY_STATE_COL  0
+
 // BPM máximo e mínimo
 #define BPM_MAX      360
 #define BPM_MED      120
@@ -120,5 +123,5 @@ const byte LED[] = {LED1,LED2,LED3,LED4};
 #define SENSOR_DEFAULT SENSOR_POTENCIOMETER
 byte sensorType = SENSOR_DEFAULT;
 
-#define WRITE_MEMORY_CHANGED_MAX_TIME 1500
+#define WRITE_MEMORY_CHANGED_MAX_TIME 5000
 #endif
