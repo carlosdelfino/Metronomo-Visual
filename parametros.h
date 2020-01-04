@@ -115,8 +115,10 @@ const double TIME_BUTTON = 350;
 const byte LED[] = {LED1,LED2,LED3,LED4};
 #define LED_NUMBER  (sizeof LED / sizeof(byte))
 
-#define POTENCIOMETER 1
-#define BUTTONS       2
-#define SENSOR_DEFAULT POTENCIOMETER
+#define SENSOR_POTENCIOMETER 1
+#define SENSOR_BUTTONS       2
+#define SENSOR_DEFAULT SENSOR_POTENCIOMETER
 byte sensorType = SENSOR_DEFAULT;
+
+#define WRITE_MEMORY_CHANGED_MAX_TIME 1500
 #endif

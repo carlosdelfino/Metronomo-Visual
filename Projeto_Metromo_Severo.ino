@@ -13,6 +13,7 @@
 // include the library code:
 #include <LiquidCrystal.h>
 #include <EEPROM.h>
+#include <limits.h>
 
 #include "parametros.h"
 #include "algoritimos.h"
@@ -30,6 +31,10 @@ byte selecionaAlgo = STATE_DEFAULT;
    e então gravada para proxima leitura.
 */
 memory_t memory;
+// joga para o máximo possível para que só tente gravar
+// se o tempo da ultima mudança for menor que o tempo atual
+double memoryChanged = __DBL_MAX__;
+
 
 void setup() {
 
@@ -75,7 +80,7 @@ void setup() {
   Serial.println(sensorType);
 #endif
 
-  checkMemoryData();
+  checkSetupMemoryData();
 
   // ###################################
   // não faça mais alterações de parametros no setup apartir daqui
@@ -90,16 +95,8 @@ void setup() {
     blinkLCD();
     delay(400);
   }
-  lcd.clear();
 
-  lcd.setCursor(LCD_BPM_BEAT_TEXT_COL, LCD_BPM_BEAT_TEXT_LINE);
-  lcd.print(LCD_BPM_BEAT_TEXT);
-
-  lcd.setCursor(LCD_BPM_TEXT_COL, LCD_BPM_TEXT_LINE);
-  lcd.print(LCD_BPM_TEXT);
-
-  lcd.setCursor(LCD_STATE_TEXT_COL, LCD_STATE_TEXT_LINE);
-  lcd.print(LCD_STATE_TEXT);
+  lcdShowParameterTitle();
 
   pinMode(POT_VCC, OUTPUT);
   pinMode(POT_GND, OUTPUT);
@@ -115,11 +112,22 @@ void setup() {
 
 }
 
+void lcdShowParameterTitle() {
+  lcd.clear();
+  lcd.setCursor(LCD_BPM_BEAT_TEXT_COL, LCD_BPM_BEAT_TEXT_LINE);
+  lcd.print(LCD_BPM_BEAT_TEXT);
+
+  lcd.setCursor(LCD_BPM_TEXT_COL, LCD_BPM_TEXT_LINE);
+  lcd.print(LCD_BPM_TEXT);
+
+  lcd.setCursor(LCD_STATE_TEXT_COL, LCD_STATE_TEXT_LINE);
+  lcd.print(LCD_STATE_TEXT);
+}
 
 /**
    Verifica se a memória eeprom está com pelo meno os dados default;
 */
-void checkMemoryData() {
+void checkSetupMemoryData() {
 #if SHOW_SERIAL
   Serial.println("Verificando dados obtidos na memória e configurações default");
   serialShowMemoryDebug(memory);
@@ -171,7 +179,9 @@ void checkButtonSetup() {
    Isso não muda nada no funcionamento da estrutura que armazena os dados.
 */
 void changeSensor() {
-  sensorType = POTENCIOMETER;
+  if (sensorType == SENSOR_POTENCIOMETER) sensorType = SENSOR_BUTTONS;
+  else  sensorType = SENSOR_POTENCIOMETER;
+
   writeMemory();
 }
 
@@ -184,8 +194,23 @@ void loop() {
 
   showBPM();
   showState();
-
+  showMemoryState();
   blinkLEDBPM();
+
+  checkMemoryData();
+}
+
+void showMemoryState() {
+
+}
+
+void checkMemoryData() {
+  if (millis() - memoryChanged > WRITE_MEMORY_CHANGED_MAX_TIME) {
+    writeMemory();
+    // joga para o máximo possível para que só tente gravar
+    // se o tempo da ultima mudança for menor que o tempo atual
+    memoryChanged = __DBL_MAX__;
+  }
 }
 
 void showState() {
@@ -258,6 +283,7 @@ void checkButton() {
       if (millis() - last_cima >= TIME_BUTTON) {
         bpm++;
         bpm = min(BPM_MAX, bpm);
+        memoryChanged = millis();
         last_cima = millis();
       }
       break;
@@ -265,6 +291,7 @@ void checkButton() {
       if (millis() - last_baixo >= TIME_BUTTON) {
         bpm--;
         bpm = max(BPM_MIN, bpm);
+        memoryChanged = millis();
         last_baixo = millis();
       }
       break;
@@ -272,6 +299,7 @@ void checkButton() {
       if (millis() - last_seleciona >= TIME_BUTTON) {
         selecionaAlgo = ++selecionaAlgo >= LED_ALGO ? 0 : selecionaAlgo;
         memory.algo = selecionaAlgo;
+        memoryChanged = millis();
         last_seleciona = millis();
       }
       break;
