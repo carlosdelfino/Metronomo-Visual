@@ -12,7 +12,12 @@
 #include <Arduino.h>
 #include "parametros.h"
 
-// matrix de alogritmo que define a sequência de acendimento de LEDs
+/** 
+ * matrix de alogritmo que define a sequência de acendimento de LEDs
+ * algoritmo, passos/estados dos leds, número de leds
+ * 
+ * 
+ */
 const boolean matrixAlgoLED[2][16][LED_NUMBER] =  {{
     {HIGH, LOW , LOW , LOW },
     {HIGH, LOW , LOW , LOW },

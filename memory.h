@@ -5,8 +5,8 @@
    @Author: Carlos Delfino - consultoria@carlosdelfino.eti.br
    @Proponente: Severiano Mesquita - Severo
 */
-#ifndef MEMORIA_H
-#define MEMORIA_H
+#ifndef MEMORY_H
+#define MEMORY_H
 
 #include <Arduino.h>
 #include "parametros.h"
@@ -19,12 +19,11 @@
 #define BPM_EEPROM_ADDRESS 0
 #endif
 
-struct memoria_t {
+struct memory_t {
+  int sensor;
+  int algo;
   int bpm;
   int bpmProg[BPM_PROG_SIZE];
 };
-
-void readMemoria(struct memoria_t input) ;
-void writeMemoria(struct memoria_t output) ;
 
 #endif

@@ -29,8 +29,11 @@
 
 #include <Arduino.h>
 
+#define VERSION "V1.3"
+
 // ativa depuração via Serial, o uso da serial pode causar assincronia dos pulsos do metromo
-#define SHOW_SERIAL   false
+#define SHOW_SERIAL   true
+
 // informa se o display deve ficar piscando
 #define BLINK_LCD     false
 // Seleciona qual algoritmo é o padrão
@@ -84,10 +87,20 @@
 // BPM máximo e mínimo
 #define BPM_MAX      360
 #define BPM_MED      120
-#define BPM_DEFAULT  60
 #define BPM_MIN      30
 
-double bpm = BPM_DEFAULT;
+// SUGESTÕES DE BPM PADRÕES PARA PROGRAMAÇÃO DA MEMÓRIA
+#define BPM_PROG_DEFAULT_0 60
+#define BPM_PROG_DEFAULT_1 80
+#define BPM_PROG_DEFAULT_2 100
+#define BPM_PROG_DEFAULT_3 120
+
+#define BPM_PROG_0 0
+#define BPM_PROG_1 1
+#define BPM_PROG_2 2
+#define BPM_PROG_3 3
+
+double bpm = BPM_PROG_DEFAULT_0;
 
 #define TIME_BLINK 700
 
@@ -102,4 +115,8 @@ const double TIME_BUTTON = 350;
 const byte LED[] = {LED1,LED2,LED3,LED4};
 #define LED_NUMBER  (sizeof LED / sizeof(byte))
 
+#define POTENCIOMETER 1
+#define BUTTONS       2
+#define SENSOR_DEFAULT POTENCIOMETER
+byte sensorType = SENSOR_DEFAULT;
 #endif
