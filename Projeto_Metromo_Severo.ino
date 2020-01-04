@@ -206,11 +206,9 @@ void checkPotenciometer() {
   static  int newBPM, lastBPM;
   int analogicBPM;
   if ( sensorType == SENSOR_POTENCIOMETER && millis() - lastChangeBPM > BPM_POT_LAST_CHANGE_TIME) {
-    analogicBPM = analogRead(POT_DERIVADA);
-    analogicBPM += analogRead(POT_DERIVADA);
-    analogicBPM += analogRead(POT_DERIVADA);
-    analogicBPM += analogRead(POT_DERIVADA);
-    analogicBPM /= 4;
+    for (int i = 0 ; i < POT_DERIVADA_MEDIA; i++)
+      analogicBPM += analogRead(POT_DERIVADA);
+    analogicBPM /= POT_DERIVADA_MEDIA;
 
     int    newBPM = map(analogicBPM, 0, 1023, BPM_MIN, BPM_MAX_POT);
     // é necessário verificar se o BPM mudou para setar a variável

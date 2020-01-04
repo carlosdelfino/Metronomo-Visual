@@ -42,6 +42,8 @@
 #define POT_VCC       A3
 #define POT_GND       A1
 #define POT_DERIVADA  A2
+// permite a leitura N vezes e faz a média para evitar instabilidades.
+#define POT_DERIVADA_MEDIA 10
 
 #define BUTTON_PORT   A0
 
