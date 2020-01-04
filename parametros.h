@@ -52,11 +52,11 @@
 #define BUTTON_LIMIAR_SELECIONA 800
 
 // NOMES DOS BOTÕES
-#define BAIXO         1
-#define CIMA          2
-#define ESQUERDA      3
-#define DIREITA       4
-#define SELECIONA     5
+#define BUTTON_DOWN   1
+#define BUTTON_UP     2
+#define BUTTON_SELECT 3
+#define BUTTON_RIGHT  4
+#define BUTTON_LEFT   5
 
 #define LCD_RS        8
 #define LCD_ENABLE    9
@@ -103,7 +103,12 @@
 #define BPM_PROG_1 1
 #define BPM_PROG_2 2
 #define BPM_PROG_3 3
+#define BPM_PROG_UP    BPM_PROG_2
+#define BPM_PROG_DOWN  BPM_PROG_3
+#define BPM_PROG_LEFT  BPM_PROG_0
+#define BPM_PROG_RIGHT BPM_PROG_1
 #define BPM_POT_LAST_CHANGE_TIME 100
+
 
 double bpm = BPM_PROG_DEFAULT_0;
 

@@ -162,7 +162,7 @@ void checkButtonSetup() {
   static boolean selecionaSetup = false;
   byte button = readButton();
   switch (button) {
-    case SELECIONA:
+    case BUTTON_SELECT:
       if (selecionaSetup) changeSensor();
       else                selecionaSetup = true;
       break;
@@ -203,15 +203,23 @@ void loop() {
 
 void checkPotenciometer() {
   static double lastChangeBPM = millis();
+  static  int newBPM, lastBPM;
   int analogicBPM;
-  if ( millis() - lastChangeBPM > BPM_POT_LAST_CHANGE_TIME) {
+  if ( sensorType == SENSOR_POTENCIOMETER && millis() - lastChangeBPM > BPM_POT_LAST_CHANGE_TIME) {
     analogicBPM = analogRead(POT_DERIVADA);
     analogicBPM += analogRead(POT_DERIVADA);
     analogicBPM += analogRead(POT_DERIVADA);
     analogicBPM += analogRead(POT_DERIVADA);
     analogicBPM /= 4;
 
-    bpm = map(analogicBPM, 0, 1023, BPM_MIN, BPM_MAX_POT);
+    int    newBPM = map(analogicBPM, 0, 1023, BPM_MIN, BPM_MAX_POT);
+    // é necessário verificar se o BPM mudou para setar a variável
+    // assim evita-se remover o bpm obtido da memória;
+    if (newBPM != lastBPM) {
+      bpm = newBPM;
+      lastBPM = newBPM;
+    }
+
     // Quando a mudança de bpm é pelo potencimetro analógico não precisa gravar na memória
     // ele grava pela posição mecânica do potenciometro.
     // é preciso analisar soluções com potenciometros digitais/tipo encoder
@@ -305,33 +313,53 @@ void showBPMTime(byte l) {
 }
 
 void checkButton() {
-  static double last_cima = millis();
-  static double last_baixo = millis();
-  static double last_seleciona = millis();
+  static double lastUp = millis();
+  static double lastDown = millis();
+  static double lastLeft = millis();
+  static double lastRight = millis();
+  static double lastSelect = millis();
 
   byte button = readButton();
   switch (button) {
-    case CIMA:
-      if (millis() - last_cima >= TIME_BUTTON) {
-        if (sensorType = SENSOR_BUTTONS) upBPM();
-        last_cima = millis();
+    case BUTTON_RIGHT:
+      if (millis() - lastLeft >= TIME_BUTTON) {
+        readBPMProg(BPM_PROG_RIGHT);
+        lastRight = millis();
       }
       break;
-    case BAIXO:
-      if (millis() - last_baixo >= TIME_BUTTON) {
-        if (sensorType = SENSOR_BUTTONS) downBPM();
-        last_baixo = millis();
+    case BUTTON_LEFT:
+      if (millis() - lastLeft >= TIME_BUTTON) {
+        readBPMProg(BPM_PROG_LEFT);
+        lastLeft = millis();
       }
       break;
-    case SELECIONA:
-      if (millis() - last_seleciona >= TIME_BUTTON) {
+    case BUTTON_UP:
+      if (millis() - lastUp >= TIME_BUTTON) {
+        if (sensorType == SENSOR_BUTTONS) upBPM();
+        else readBPMProg(BPM_PROG_UP);
+        lastUp = millis();
+      }
+      break;
+    case BUTTON_DOWN:
+      if (millis() - lastDown >= TIME_BUTTON) {
+        if (sensorType == SENSOR_BUTTONS) downBPM();
+        else readBPMProg(BPM_PROG_DOWN);
+        lastDown = millis();
+      }
+      break;
+    case BUTTON_SELECT:
+      if (millis() - lastSelect >= TIME_BUTTON) {
         selecionaAlgo = ++selecionaAlgo >= LED_ALGO ? 0 : selecionaAlgo;
         memory.algo = selecionaAlgo;
         memoryChanged = millis();
-        last_seleciona = millis();
+        lastSelect = millis();
       }
       break;
   }
+}
+
+void readBPMProg(byte prog) {
+  bpm = memory.bpmProg[prog];
 }
 
 void upBPM() {
@@ -350,15 +378,15 @@ void downBPM() {
 byte readButton() {
   int  botao = analogRead (BUTTON_PORT);
   if (botao < BUTTON_LIMIAR_DIREITA) {
-    return DIREITA;
+    return BUTTON_RIGHT;
   }   else if (botao < BUTTON_LIMIAR_CIMA) {
-    return CIMA;
+    return BUTTON_UP;
   }   else if (botao < BUTTON_LIMIAR_BAIXO) {
-    return BAIXO;
+    return BUTTON_DOWN;
   }   else if (botao < BUTTON_LIMIAR_ESQUERDA) {
-    return ESQUERDA;
+    return BUTTON_LEFT;
   }   else if (botao < BUTTON_LIMIAR_SELECIONA) {
-    return SELECIONA;
+    return BUTTON_SELECT;
   }
   return NULL;
 }
