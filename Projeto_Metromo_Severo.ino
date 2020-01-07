@@ -10,6 +10,7 @@
 
 */
 
+
 // include the library code:
 #include <LiquidCrystal.h>
 #include <EEPROM.h>
@@ -18,6 +19,9 @@
 #include "parametros.h"
 #include "algoritimos.h"
 #include "memory.h"
+
+// a função tem parametros default, portanto precisa ser sua assinatura declarada aqui
+void showSensorType(boolean wait=true, long waitTime = SENSOR_TYPE_SHOW_TIME);
 
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
@@ -47,26 +51,27 @@ void setup() {
   Serial.println("Arduino Minas");
 #endif
 
-  readmemory();
+  readMemory();
   /*
      inicia a verificar se algum botão está precionado durante o setup
      veja detalhes na próxima chamdaa desta função
   */
-  checkButtonSetup();
-
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
+  checkButtonSetup();
+  showSensorType(false);
+
+  lcd.setCursor(0, 0);
   for (int i = 0; i < 16; i++) {
     lcd.print("#");
-    delay(80);
+    delay(SHOW_INIT_STEP_TIME);
   }
   lcd.setCursor(0, 1);
   for (int i = 0; i < 16; i++) {
     lcd.print("#");
-    delay(80);
+    delay(SHOW_INIT_STEP_TIME);
   }
-  lcd.clear();
 
   /*
      Caso o botão ainda esteja precionado depois deste estágio,
@@ -74,10 +79,14 @@ void setup() {
      leitura do bpm muda de botão para potenciometro
   */
   checkButtonSetup();
+  showSensorType(true);
+  waitReleaseButtonSetup();
+
+  lcd.clear();
 
 #if SHOW_SERIAL
   Serial.print("Sensor Type: ");
-  Serial.println(sensorType);
+  Serial.println(memory.sensor);
 #endif
 
   checkSetupMemoryData();
@@ -112,6 +121,25 @@ void setup() {
 
 }
 
+void showSensorType(boolean wait, long waitTime) {
+  lcd.setCursor(0, 0);
+  lcd.print("Sensor: ");
+  if (memory.sensor == SENSOR_POTENCIOMETER) {
+    lcd.print("POTENCIOMETER");
+  }
+  else {
+    lcd.print("BUTTONS");
+  }
+  if (wait)  delay(waitTime); // dar tempo do usuário ler o tipo de sensor
+
+}
+/**
+   Aguarda durante o setup que o usuário solte o botão Select
+*/
+void waitReleaseButtonSetup() {
+  while (readButton() == BUTTON_SELECT) delay(100);
+}
+
 void lcdShowParameterTitle() {
   lcd.clear();
   lcd.setCursor(LCD_BPM_BEAT_TEXT_COL, LCD_BPM_BEAT_TEXT_LINE);
@@ -140,7 +168,7 @@ void checkSetupMemoryData() {
     Serial.println("memoria zerada, gravando pela primeira vez!");
 #endif
     memory.bpm = bpm;
-    memory.sensor = sensorType;
+    memory.sensor = SENSOR_DEFAULT;
     memory.algo = selecionaAlgo;
     memory.bpmProg[BPM_PROG_0] = BPM_PROG_DEFAULT_0;
     memory.bpmProg[BPM_PROG_1] = BPM_PROG_DEFAULT_1;
@@ -149,7 +177,7 @@ void checkSetupMemoryData() {
     writeMemory();
   } else {
     bpm = memory.bpm;
-    sensorType = memory.sensor;
+
     selecionaAlgo = memory.algo;
   }
 
@@ -163,8 +191,18 @@ void checkButtonSetup() {
   byte button = readButton();
   switch (button) {
     case BUTTON_SELECT:
-      if (selecionaSetup) changeSensor();
-      else                selecionaSetup = true;
+      if (selecionaSetup) {
+        changeSensor();
+#if SHOW_SERIAL
+        Serial.println("Troca do Sensor finalizada!");
+#endif
+      }
+      else {
+#if SHOW_SERIAL
+        Serial.println("Inicia Troca do Sensor: ");
+#endif
+        selecionaSetup = true;
+      }
       break;
   }
 }
@@ -179,8 +217,17 @@ void checkButtonSetup() {
    Isso não muda nada no funcionamento da estrutura que armazena os dados.
 */
 void changeSensor() {
-  if (sensorType == SENSOR_POTENCIOMETER) sensorType = SENSOR_BUTTONS;
-  else  sensorType = SENSOR_POTENCIOMETER;
+#if SHOW_SERIAL
+  Serial.print("Tipo de sensor era: ");
+  Serial.print(memory.sensor);
+#endif
+  memory.sensor = (memory.sensor == SENSOR_POTENCIOMETER) ? SENSOR_BUTTONS : SENSOR_POTENCIOMETER;
+
+
+#if SHOW_SERIAL
+  Serial.print(", agora é:  ");
+  Serial.println(memory.sensor);
+#endif
 
   writeMemory();
 }
@@ -205,7 +252,7 @@ void checkPotenciometer() {
   static double lastChangeBPM = millis();
   static  int newBPM, lastBPM;
   int analogicBPM;
-  if ( sensorType == SENSOR_POTENCIOMETER && millis() - lastChangeBPM > BPM_POT_LAST_CHANGE_TIME) {
+  if ( memory.sensor == SENSOR_POTENCIOMETER && millis() - lastChangeBPM > BPM_POT_LAST_CHANGE_TIME) {
     for (int i = 0 ; i < POT_DERIVADA_MEDIA; i++)
       analogicBPM += analogRead(POT_DERIVADA);
     analogicBPM /= POT_DERIVADA_MEDIA;
@@ -311,51 +358,86 @@ void showBPMTime(byte l) {
 }
 
 void checkButton() {
-  static double lastUp = millis();
-  static double lastDown = millis();
-  static double lastLeft = millis();
-  static double lastRight = millis();
-  static double lastSelect = millis();
+  static byte lastButton = BUTTON_NULL;
+  byte actualButton = readButton();
 
-  byte button = readButton();
-  switch (button) {
-    case BUTTON_RIGHT:
-      if (millis() - lastLeft >= TIME_BUTTON) {
+  // para simular o efeito soltar botão,
+  // para que a ação seja somente feita depois que o botão foi solto
+  lastButton = actButton(actualButton, lastButton);
+}
+
+byte actButton(byte actualButton, byte lastButton) {
+  static double last = 0;
+
+#if SHOW_SERIAL
+  Serial.print("Actual Button: ");
+  Serial.print(actualButton);
+  Serial.print(" Last Button: ");
+  Serial.println(lastButton);
+#endif
+
+  if (actualButton != BUTTON_NULL && lastButton == actualButton ) {
+#if SHOW_SERIAL
+    Serial.print("---------------32--------------------: ");
+    Serial.print(last);
+    Serial.print("  ");
+    Serial.print(millis());
+    Serial.println(" last and actual equal");
+#endif
+    if ( millis() - last > BUTTON_TIME) {
+      switch (lastButton ) {
+        case BUTTON_RIGHT:
+          writeBPMProg(BPM_PROG_RIGHT);
+          break;
+        case BUTTON_LEFT:
+          writeBPMProg(BPM_PROG_LEFT);
+          break;
+        case BUTTON_UP:
+          if (memory.sensor == SENSOR_POTENCIOMETER)
+            writeBPMProg(BPM_PROG_UP);
+          break;
+        case BUTTON_DOWN:
+          if (memory.sensor == SENSOR_POTENCIOMETER)
+            writeBPMProg(BPM_PROG_DOWN);
+      }
+      last = 0;
+    }
+  } else if (actualButton == BUTTON_NULL && lastButton != BUTTON_NULL) {
+#if SHOW_SERIAL
+    Serial.print("---------------33--------------------");
+    Serial.println("last new button and actual equal null");
+#endif
+    switch (lastButton ) {
+      case BUTTON_RIGHT:
         readBPMProg(BPM_PROG_RIGHT);
-        lastRight = millis();
-      }
-      break;
-    case BUTTON_LEFT:
-      if (millis() - lastLeft >= TIME_BUTTON) {
+        break;
+      case BUTTON_LEFT:
         readBPMProg(BPM_PROG_LEFT);
-        lastLeft = millis();
-      }
-      break;
-    case BUTTON_UP:
-      if (millis() - lastUp >= TIME_BUTTON) {
-        if (sensorType == SENSOR_BUTTONS) upBPM();
+        break;
+      case BUTTON_UP:
+        if (memory.sensor == SENSOR_BUTTONS) upBPM();
         else readBPMProg(BPM_PROG_UP);
-        lastUp = millis();
-      }
-      break;
-    case BUTTON_DOWN:
-      if (millis() - lastDown >= TIME_BUTTON) {
-        if (sensorType == SENSOR_BUTTONS) downBPM();
+        break;
+      case BUTTON_DOWN:
+        if (memory.sensor == SENSOR_BUTTONS) downBPM();
         else readBPMProg(BPM_PROG_DOWN);
-        lastDown = millis();
-      }
-      break;
-    case BUTTON_SELECT:
-      if (millis() - lastSelect >= TIME_BUTTON) {
+        break;
+      case BUTTON_SELECT:
         selecionaAlgo = ++selecionaAlgo >= LED_ALGO ? 0 : selecionaAlgo;
         memory.algo = selecionaAlgo;
         memoryChanged = millis();
-        lastSelect = millis();
-      }
-      break;
+        break;
+    }
+    last = 0;
   }
+  else  last = millis();
+  return actualButton;
 }
 
+void writeBPMProg(byte prog) {
+  memory.bpmProg[prog] = bpm;
+  memoryChanged = millis();
+}
 void readBPMProg(byte prog) {
   bpm = memory.bpmProg[prog];
 }
@@ -386,7 +468,7 @@ byte readButton() {
   }   else if (botao < BUTTON_LIMIAR_SELECIONA) {
     return BUTTON_SELECT;
   }
-  return NULL;
+  return BUTTON_NULL;
 }
 
 void blinkLCD() {
@@ -427,7 +509,7 @@ void writeMemory() {
 #endif
 }
 
-void readmemory() {
+void readMemory() {
 #if SHOW_SERIAL
   Serial.print("Read Memoria: ");
   Serial.println(BPM_EEPROM_ADDRESS);

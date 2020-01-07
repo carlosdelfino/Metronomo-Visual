@@ -59,6 +59,10 @@
 #define BUTTON_SELECT 3
 #define BUTTON_RIGHT  4
 #define BUTTON_LEFT   5
+#define BUTTON_NULL   99
+// tempo que o botão deve ficar precionado para chamar segunda ação
+#define BUTTON_TIME 5000
+
 
 #define LCD_RS        8
 #define LCD_ENABLE    9
@@ -111,12 +115,10 @@
 #define BPM_PROG_RIGHT BPM_PROG_1
 #define BPM_POT_LAST_CHANGE_TIME 100
 
-
 double bpm = BPM_PROG_DEFAULT_0;
 
 #define TIME_BLINK 700
 
-const double TIME_BUTTON = 350;
 
 // matrix de LED a ser acionada confrome matrix de algoritimo
 #define LED1 13
@@ -130,7 +132,13 @@ const byte LED[] = {LED1,LED2,LED3,LED4};
 #define SENSOR_POTENCIOMETER 1
 #define SENSOR_BUTTONS       2
 #define SENSOR_DEFAULT SENSOR_POTENCIOMETER
-byte sensorType = SENSOR_DEFAULT;
+
+#define SENSOR_TYPE_SHOW_TIME 300
 
 #define WRITE_MEMORY_CHANGED_MAX_TIME 5000
+
+// tempo entre cada adição do # na inicialização
+// deve ser influenciada por sensor_type_show_time
+#define SHOW_INIT_STEP_TIME 80
+
 #endif
