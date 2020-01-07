@@ -1,14 +1,16 @@
 TODO Metrônomo Severiano
 ========================
 
-## 10 - [STARTED] liberar versão 1.4
+## 11 - [STARTED] iniciar versão 1.5
+
+## 10 - [DONE] liberar versão 1.4
 
 ## 9 - [STARTED] Remover variáveis dúblicas em relação ao Struct de memory
 
 Algumas variáveis são conseitualmente duplicadas, já que se existem no struct memory, não precisa existir externamente no algortimo mesmo durante a execução.
 [STARTED] 07/01/2020
 
-## 1 - Exibir tipo de sensor ao iniciar
+## 1 - [DONE] Exibir tipo de sensor ao iniciar
 
 [DONE]
 
@@ -47,3 +49,31 @@ A inicialização usa em demasia a fução delay, e deve ser adotado algum mecan
 ## 8 - Testar LEDs durante o setup quando testa o LCD.
 
 Fazer uma função que faça os leds piscarem sequêncialmente para testes dos LEDs.
+
+## Versão 1.6 - BIP audivel
+
+Adicionar um BIP audivel ativado via setup, segurando o botão Righ durante a inicialização deve ativar ou desativar o BIP.
+Para evitar acidentes de acionar o BIP durante um evento, este só pode ser ativado quando se liga/reseta o aparelho, evitando acidentes.
+ 
+## Versão 1.7 - Circuito de teste liberado
+
+[PREVISAO] 11/01/2020
+
+## Versão 2 - PWM nos LEDs
+
+Na versão 2 deve ser adicionado PWM aos LEDs para controlar luminosidade da fita.
+precionando 3 vezes o botão select, entra no modo ajustar brilho, então este é feito no potenciometro ou nos botões conforme seleção dos sensor bpm no setup.
+
+[PREVISAO] 16/01/2020
+
+## Versão 2.* - prototipo final liberado
+
+[PREVISAO] 20/01/2020
+
+## Versão 3 - Display LCD maior
+
+Na versão 3 estudar o uso de um display maior 
+
+## Versão 4 - Display TFT
+
+Adotar um display Touch Screen com teclado alfanúmerico com lista de rítimos nomeados
