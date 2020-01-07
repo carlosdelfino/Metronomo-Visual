@@ -21,12 +21,10 @@
 #include "memory.h"
 
 // a função tem parametros default, portanto precisa ser sua assinatura declarada aqui
-void showSensorType(boolean wait=true, long waitTime = SENSOR_TYPE_SHOW_TIME);
-
+void showSensorType(boolean wait = true, long waitTime = SENSOR_TYPE_SHOW_TIME);
+void showResetMemory(boolean wait = true, long waitTime = SHOW_RESETMEMORY_DELAY_STARTUP);
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
-
-byte selecionaAlgo = STATE_DEFAULT;
 
 /**
    Memória onde ficam dados relativos ao setup do firmware;
@@ -102,7 +100,7 @@ void setup() {
   lcd.print(VERSION);
   for (int i = 0; i < 9; i++) {
     blinkLCD();
-    delay(400);
+    delay(SHOW_BLINK_DELAY_STARTUP);
   }
 
   lcdShowParameterTitle();
@@ -167,18 +165,7 @@ void checkSetupMemoryData() {
 #if SHOW_SERIAL
     Serial.println("memoria zerada, gravando pela primeira vez!");
 #endif
-    memory.bpm = bpm;
-    memory.sensor = SENSOR_DEFAULT;
-    memory.algo = selecionaAlgo;
-    memory.bpmProg[BPM_PROG_0] = BPM_PROG_DEFAULT_0;
-    memory.bpmProg[BPM_PROG_1] = BPM_PROG_DEFAULT_1;
-    memory.bpmProg[BPM_PROG_2] = BPM_PROG_DEFAULT_2;
-    memory.bpmProg[BPM_PROG_3] = BPM_PROG_DEFAULT_3;
-    writeMemory();
-  } else {
-    bpm = memory.bpm;
-
-    selecionaAlgo = memory.algo;
+    resetMemory();
   }
 
 #if SHOW_SERIAL
@@ -187,11 +174,18 @@ void checkSetupMemoryData() {
 }
 
 void checkButtonSetup() {
-  static boolean selecionaSetup = false;
+  static byte selecionaSetup = BUTTON_NULL;
   byte button = readButton();
   switch (button) {
+    case BUTTON_LEFT:
+      if (selecionaSetup == BUTTON_LEFT) {
+        resetMemory();
+      } else {
+        selecionaSetup = BUTTON_LEFT;
+      }
+      break;
     case BUTTON_SELECT:
-      if (selecionaSetup) {
+      if (selecionaSetup == BUTTON_SELECT) {
         changeSensor();
 #if SHOW_SERIAL
         Serial.println("Troca do Sensor finalizada!");
@@ -201,12 +195,29 @@ void checkButtonSetup() {
 #if SHOW_SERIAL
         Serial.println("Inicia Troca do Sensor: ");
 #endif
-        selecionaSetup = true;
+        selecionaSetup = BUTTON_SELECT;
       }
       break;
   }
 }
 
+void resetMemory() {
+  memory.bpm = BPM_DEFAULT;
+  memory.sensor = SENSOR_DEFAULT;
+  memory.algo = ALGO_DEFAULT;
+  memory.bpmProg[BPM_PROG_0] = BPM_PROG_DEFAULT_0;
+  memory.bpmProg[BPM_PROG_1] = BPM_PROG_DEFAULT_1;
+  memory.bpmProg[BPM_PROG_2] = BPM_PROG_DEFAULT_2;
+  memory.bpmProg[BPM_PROG_3] = BPM_PROG_DEFAULT_3;
+  showResetMemory();
+  writeMemory();
+}
+
+void showResetMemory(boolean wait,long waitDelay) {
+  lcd.setCursor(0, 1);
+  lcd.print("Memory Default!");
+  if (wait)delay(waitDelay);
+}
 /**
    Altera o funcionamento do sensor do BPM
 
@@ -251,7 +262,7 @@ void loop() {
 void checkPotenciometer() {
   static double lastChangeBPM = millis();
   static  int newBPM, lastBPM;
-  int analogicBPM;
+  int analogicBPM = 0;
   if ( memory.sensor == SENSOR_POTENCIOMETER && millis() - lastChangeBPM > BPM_POT_LAST_CHANGE_TIME) {
     for (int i = 0 ; i < POT_DERIVADA_MEDIA; i++)
       analogicBPM += analogRead(POT_DERIVADA);
@@ -261,7 +272,7 @@ void checkPotenciometer() {
     // é necessário verificar se o BPM mudou para setar a variável
     // assim evita-se remover o bpm obtido da memória;
     if (newBPM != lastBPM) {
-      bpm = newBPM;
+      memory.bpm = newBPM;
       lastBPM = newBPM;
     }
 
@@ -274,7 +285,7 @@ void checkPotenciometer() {
   Serial.print("Analogic BPM: ");
   Serial.print(analogicBPM);
   Serial.print(" BPM: ");
-  Serial.println(bpm);
+  Serial.println(memory.bpm);
 #endif
 
 }
@@ -300,23 +311,23 @@ void checkMemoryData() {
 
 void showState() {
   static byte stateShow = 99;
-  if (stateShow != selecionaAlgo) {
+  if (stateShow != memory.algo) {
     lcd.setCursor(LCD_STATE_VALUE_COL, LCD_STATE_VALUE_LINE);
     //    lcd.print("  ");
     //    lcd.setCursor(14, 1);
-    lcd.print(selecionaAlgo);
-    stateShow = selecionaAlgo;
+    lcd.print(memory.algo);
+    stateShow = memory.algo;
   }
 
 }
 void showBPM() {
   static double bpmShow;
-  if (bpmShow != bpm) {
+  if (bpmShow != memory.bpm) {
     lcd.setCursor(5, 1);
     lcd.print("    ");
     lcd.setCursor(5, 1);
-    lcd.print((int)bpm);
-    bpmShow = bpm;
+    lcd.print((int)memory.bpm);
+    bpmShow = memory.bpm;
   }
 }
 
@@ -324,21 +335,21 @@ void blinkLEDBPM() {
   static double last_led;
   static byte ledState = 0;
 
-  double bpmCalc = (1 / (bpm / 60) * 1000);
-  if (millis() - last_led >= bpmCalc / matrixAlgoFator[selecionaAlgo]) {
+  double bpmCalc = (1 / (memory.bpm / 60) * 1000);
+  if (millis() - last_led >= bpmCalc / matrixAlgoFator[memory.algo]) {
 #if SHOW_SERIAL
     Serial.print("Algo: ");
-    Serial.print(selecionaAlgo);
+    Serial.print(memory.algo);
     Serial.print(" ");
 #endif
     for (byte l = 0; l < LED_NUMBER; l++) {
-      digitalWrite(LED[l], matrixAlgoLED[selecionaAlgo][ledState][l]);
+      digitalWrite(LED[l], matrixAlgoLED[memory.algo][ledState][l]);
 #if SHOW_SERIAL
-      Serial.print(matrixAlgoLED[selecionaAlgo][ledState][l]);
+      Serial.print(matrixAlgoLED[memory.algo][ledState][l]);
       Serial.print(" ");
 #endif
     }
-    showBPMTime((ledState / matrixAlgoFator[selecionaAlgo]) + 1);
+    showBPMTime((ledState / matrixAlgoFator[memory.algo]) + 1);
 
 #if SHOW_SERIAL
     Serial.println();
@@ -423,8 +434,7 @@ byte actButton(byte actualButton, byte lastButton) {
         else readBPMProg(BPM_PROG_DOWN);
         break;
       case BUTTON_SELECT:
-        selecionaAlgo = ++selecionaAlgo >= LED_ALGO ? 0 : selecionaAlgo;
-        memory.algo = selecionaAlgo;
+        memory.algo = ++memory.algo >= LED_ALGO ? 0 : memory.algo;
         memoryChanged = millis();
         break;
     }
@@ -435,24 +445,22 @@ byte actButton(byte actualButton, byte lastButton) {
 }
 
 void writeBPMProg(byte prog) {
-  memory.bpmProg[prog] = bpm;
+  memory.bpmProg[prog] = memory.bpm;
   memoryChanged = millis();
 }
 void readBPMProg(byte prog) {
-  bpm = memory.bpmProg[prog];
+  memory.bpm = memory.bpmProg[prog];
 }
 
 void upBPM() {
-  bpm++;
-  bpm = min(BPM_MAX, bpm);
-  memory.bpm = bpm;
+  memory.bpm++;
+  memory.bpm = min(BPM_MAX, memory.bpm);
   memoryChanged = millis();
 }
 
 void downBPM() {
-  bpm--;
-  bpm = max(BPM_MIN, bpm);
-  memory.bpm = bpm;
+  memory.bpm--;
+  memory.bpm = max(BPM_MIN, memory.bpm);
   memoryChanged = millis();
 }
 byte readButton() {

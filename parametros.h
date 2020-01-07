@@ -37,7 +37,7 @@
 // informa se o display deve ficar piscando
 #define BLINK_LCD     false
 // Seleciona qual algoritmo é o padrão
-#define STATE_DEFAULT   1
+#define ALGO_DEFAULT   1
 
 #define POT_VCC       A3
 #define POT_GND       A1
@@ -104,6 +104,7 @@
 #define BPM_PROG_DEFAULT_1 80
 #define BPM_PROG_DEFAULT_2 100
 #define BPM_PROG_DEFAULT_3 120
+#define BPM_DEFAULT BPM_PROG_DEFAULT_0
 
 #define BPM_PROG_0 0
 #define BPM_PROG_1 1
@@ -114,8 +115,6 @@
 #define BPM_PROG_LEFT  BPM_PROG_0
 #define BPM_PROG_RIGHT BPM_PROG_1
 #define BPM_POT_LAST_CHANGE_TIME 100
-
-double bpm = BPM_PROG_DEFAULT_0;
 
 #define TIME_BLINK 700
 
@@ -141,4 +140,7 @@ const byte LED[] = {LED1,LED2,LED3,LED4};
 // deve ser influenciada por sensor_type_show_time
 #define SHOW_INIT_STEP_TIME 80
 
+#define SHOW_BLINK_DELAY_STARTUP 300
+
+#define SHOW_RESETMEMORY_DELAY_STARTUP 200
 #endif
