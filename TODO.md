@@ -1,6 +1,26 @@
 TODO Metrônomo Severiano
 ========================
 
+## [STARTED] Versão 1.5 - Circuito de teste liberado
+
+[PREVISAO] 11/01/2020
+[STARTED] 07/01/2020
+
+## [STARTED] Versão 1.5
+
+[STARTED] 07/01/2020
+
+## [DONE] mudança de pino dos LEDs para uso do pwm futuro
+
+Alterei o LED4 para pino 2 assim o pino 3 que é PWM e poderá ser aplicado futuramente para controle PWM geral.
+[DONE] 07/01/2020 22:07
+
+
+## [DONE] CORRIGIR FALTA DO BREAK APÓS LINHA 412
+
+o Break que falta após a linha 412 não causa problema, mas pode vir a ser um bug futuramente.
+[DONE] 07/01/2020 20:16
+
 ## [DONE] corrigir bug na leitura do potenciometro
 
 A leitura do potenciometro está dando um valor irreal quando está no máximo, ele ultrapassa o limite de 360 (362);
@@ -16,7 +36,7 @@ Algumas variáveis são conseitualmente duplicadas, já que se existem no struct
 
 Era 400 passei pra 300 e criei uma constante em parameters.h
 
-## [DONE] reduzir o tempo de passo do caracter #
+## [DONE] reduzir o tempo de passo do caracter "#"
 
 Era 80 passei para 70
 
@@ -25,9 +45,6 @@ Era 80 passei para 70
 Ao ligar o Metronomo com o botão segurando Left, deve resetar a memoria para usar a configuração padrão;
 [DONE] 07/01/2020
 
-## 11 - [STARTED] Versão 1.5
-
-[STARTED] 07/01/2020
 
 ## 10 - [DONE] liberar versão 1.4
 
@@ -92,9 +109,6 @@ Ao selecionar o BPM de uma das programações nos botões, gravar como sendo o B
 Adicionar um BIP audivel ativado via setup, segurando o botão Righ durante a inicialização deve ativar ou desativar o BIP.
 Para evitar acidentes de acionar o BIP durante um evento, este só pode ser ativado quando se liga/reseta o aparelho, evitando acidentes.
  
-## Versão 1.7 - Circuito de teste liberado
-
-[PREVISAO] 11/01/2020
 
 ## Versão 2 - PWM nos LEDs
 

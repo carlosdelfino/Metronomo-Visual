@@ -410,6 +410,7 @@ byte actButton(byte actualButton, byte lastButton) {
         case BUTTON_DOWN:
           if (memory.sensor == SENSOR_POTENCIOMETER)
             writeBPMProg(BPM_PROG_DOWN);
+          break;
       }
       last = 0;
     }

@@ -119,11 +119,14 @@
 #define TIME_BLINK 700
 
 
-// matrix de LED a ser acionada confrome matrix de algoritimo
+// matrix de LED a ser acionada conforme matrix de algoritimo
+// 13, 12, 11, 03, 02, 01, 00 podem ser usadas com o shield
+// 11 e 03 são PWM
+// 0 e 1 são RX e TX
 #define LED1 13
 #define LED2 12
 #define LED3 11
-#define LED4 03
+#define LED4 02
 
 const byte LED[] = {LED1,LED2,LED3,LED4};
 #define LED_NUMBER  (sizeof LED / sizeof(byte))
