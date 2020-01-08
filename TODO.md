@@ -1,6 +1,13 @@
 TODO Metrônomo Severiano
 ========================
 
+## [DONE] LOGOS
+
+Adicionado os logos das empressa envolvidas no projeto
+Adicionado o logo do projeto
+Adicionado os Logos no layout do circuito.
+
+
 ## [STARTED] Versão 1.5 - Circuito de teste liberado
 
 [PREVISAO] 11/01/2020
@@ -104,11 +111,22 @@ Ao selecionar o BPM de uma das programações nos botões, gravar como sendo o B
 
 [GENERATED] 07/01/2020
 
+## Versão 1.6 - Ajustar tamanho da placa para padrão de venda
+
+As placas vem em padrões de tamanho em algumas lojas, ampliar o tamanho para que encaixe nestas dimensões.
+
 ## Versão 1.6 - BIP audivel
 
 Adicionar um BIP audivel ativado via setup, segurando o botão Righ durante a inicialização deve ativar ou desativar o BIP.
 Para evitar acidentes de acionar o BIP durante um evento, este só pode ser ativado quando se liga/reseta o aparelho, evitando acidentes.
  
+## Versão 1.7 - Inserir mosfet para driver do LEDs
+
+Nesta versão já adotamos a fita de LED, assim é necessário os Drivers para Mosfet
+
+## Versão 1.7 - Adotar Fita de LED
+
+Adotar a fita de LED
 
 ## Versão 2 - PWM nos LEDs
 
