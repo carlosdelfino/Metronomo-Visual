@@ -1,6 +1,15 @@
 TODO Metrônomo Severiano
 ========================
 
+## [STARTED] Correção da função secundária do botão quando não tulizando potenciometro
+
+Quando não está usando o potenciometro para mudar o BPM, e se mantem o botão UP e Down precionado, o update deve iniciar depois de x segundos acelerando ao máximo a cada y ms.
+
+Este código está iniciado no branch "aula_severo_08_01_2020"
+
+[STARTED] 08/01/2020
+
+
 ## [DONE] LOGOS
 
 Adicionado os logos das empressa envolvidas no projeto
