@@ -29,7 +29,7 @@
 
 #include <Arduino.h>
 
-#define VERSION "V1.3"
+#define VERSION "V1.5"
 
 // ativa depuração via Serial, o uso da serial pode causar assincronia dos pulsos do metromo
 #define SHOW_SERIAL   true
@@ -61,7 +61,7 @@
 #define BUTTON_LEFT   5
 #define BUTTON_NULL   99
 // tempo que o botão deve ficar precionado para chamar segunda ação
-#define BUTTON_TIME 5000
+#define BUTTON_TIME 2000
 
 
 #define LCD_RS        8
