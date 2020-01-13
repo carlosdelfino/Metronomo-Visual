@@ -213,7 +213,7 @@ void resetMemory() {
   writeMemory();
 }
 
-void showResetMemory(boolean wait,long waitDelay) {
+void showResetMemory(boolean wait, long waitDelay) {
   lcd.setCursor(0, 1);
   lcd.print("Memory Default!");
   if (wait)delay(waitDelay);
@@ -261,7 +261,7 @@ void loop() {
 
 void checkPotenciometer() {
   static double lastChangeBPM = millis();
-  static  int newBPM, lastBPM;
+  static  int newBPM = 0;
   int analogicBPM = 0;
   if ( memory.sensor == SENSOR_POTENCIOMETER && millis() - lastChangeBPM > BPM_POT_LAST_CHANGE_TIME) {
     for (int i = 0 ; i < POT_DERIVADA_MEDIA; i++)
@@ -271,10 +271,7 @@ void checkPotenciometer() {
     int    newBPM = map(analogicBPM, 0, 1023, BPM_MIN, BPM_MAX_POT);
     // é necessário verificar se o BPM mudou para setar a variável
     // assim evita-se remover o bpm obtido da memória;
-    if (newBPM != lastBPM) {
-      memory.bpm = newBPM;
-      lastBPM = newBPM;
-    }
+    memory.bpm = (newBPM != memory.bpm) ? newBPM : memory.bpm ;
 
     // Quando a mudança de bpm é pelo potencimetro analógico não precisa gravar na memória
     // ele grava pela posição mecânica do potenciometro.
@@ -321,26 +318,38 @@ void showState() {
 
 }
 void showBPM() {
-  static double bpmShow;
+  static int bpmShow;
   if (bpmShow != memory.bpm) {
     lcd.setCursor(5, 1);
     lcd.print("    ");
     lcd.setCursor(5, 1);
-    lcd.print((int)memory.bpm);
+    lcd.print(memory.bpm);
     bpmShow = memory.bpm;
   }
 }
 
 void blinkLEDBPM() {
-  static double last_led;
+  static double lastLed = 0;
   static byte ledState = 0;
 
-  double bpmCalc = (1 / (memory.bpm / 60) * 1000);
-  if (millis() - last_led >= bpmCalc / matrixAlgoFator[memory.algo]) {
+#if SHOW_SERIAL
+  Serial.print("Last: ");
+  Serial.print(lastLed);
+  Serial.print(" millis: ");
+  Serial.print(millis());
+  Serial.print(" time: ");
+  Serial.println(millis() - lastLed);
+#endif
+
+  double bpmCalc = ((1 / ((((double)memory.bpm) / 60.0)) * 1000) / matrixAlgoFator[memory.algo]);
+  if ((millis() - lastLed) > bpmCalc) {
 #if SHOW_SERIAL
     Serial.print("Algo: ");
     Serial.print(memory.algo);
-    Serial.print(" ");
+    Serial.print(" BPM: ");
+    Serial.print(memory.bpm);
+    Serial.print(" BPM Calc: ");
+    Serial.print(bpmCalc);
 #endif
     for (byte l = 0; l < LED_NUMBER; l++) {
       digitalWrite(LED[l], matrixAlgoLED[memory.algo][ledState][l]);
@@ -355,7 +364,7 @@ void blinkLEDBPM() {
     Serial.println();
 #endif
     ledState = (++ledState >= LED_STATES) ? 0 : ledState;
-    last_led = millis();
+    lastLed = millis();
   }
 }
 
@@ -412,7 +421,7 @@ byte actButton(byte actualButton, byte lastButton) {
         case BUTTON_DOWN:
           if (memory.sensor == SENSOR_POTENCIOMETER)
             writeBPMProg(BPM_PROG_DOWN);
-            else
+          else
             downBPM();
           break;
       }
