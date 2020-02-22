@@ -261,7 +261,9 @@ void loop() {
 
 void checkPotenciometer() {
   static double lastChangeBPM = millis();
-  static  int newBPM = 0;
+  static int newBPM = 0;
+  static int oldBPM = 0;
+  
   int analogicBPM = 0;
   if ( memory.sensor == SENSOR_POTENCIOMETER && millis() - lastChangeBPM > BPM_POT_LAST_CHANGE_TIME) {
     for (int i = 0 ; i < POT_DERIVADA_MEDIA; i++)
@@ -271,8 +273,11 @@ void checkPotenciometer() {
     int    newBPM = map(analogicBPM, 0, 1023, BPM_MIN, BPM_MAX_POT);
     // é necessário verificar se o BPM mudou para setar a variável
     // assim evita-se remover o bpm obtido da memória;
-    memory.bpm = (newBPM != memory.bpm) ? newBPM : memory.bpm ;
-
+    if(newBPM != oldBPM){
+      memory.bpm =  newBPM;
+      oldBPM = newBPM;
+    }
+    
     // Quando a mudança de bpm é pelo potencimetro analógico não precisa gravar na memória
     // ele grava pela posição mecânica do potenciometro.
     // é preciso analisar soluções com potenciometros digitais/tipo encoder
@@ -430,7 +435,7 @@ byte actButton(byte actualButton, byte lastButton) {
   } else if (actualButton == BUTTON_NULL && lastButton != BUTTON_NULL) {
 #if SHOW_SERIAL
     Serial.print("---------------33--------------------");
-    Serial.println("last new button and actual equal null");
+    Serial.println("last new button and actual diferent null");
 #endif
     switch (lastButton ) {
       case BUTTON_RIGHT:
@@ -462,8 +467,15 @@ void writeBPMProg(byte prog) {
   memory.bpmProg[prog] = memory.bpm;
   memoryChanged = millis();
 }
+
 void readBPMProg(byte prog) {
   memory.bpm = memory.bpmProg[prog];
+#if SHOW_SERIAL
+    Serial.print("readBPMProg: ");
+    Serial.print(prog);
+    Serial.print(" BPM: ");
+    Serial.println(memory.bpm);
+#endif
 }
 
 void upBPM() {
