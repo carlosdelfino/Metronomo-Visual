@@ -49,15 +49,16 @@ void setup() {
   Serial.println("Arduino Minas");
 #endif
 
+  // Lê dados padrões da memória
   readMemory();
-  /*
-     inicia a verificar se algum botão está precionado durante o setup
-     veja detalhes na próxima chamdaa desta função
-  */
-  // set up the LCD's number of columns and rows:
+
+   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
+  //   inicia a verificar se algum botão está precionado durante o setup
+  //   veja detalhes na próxima chamdaa desta função
   checkButtonSetup();
+
   showSensorType(false);
 
   lcd.setCursor(0, 0);
